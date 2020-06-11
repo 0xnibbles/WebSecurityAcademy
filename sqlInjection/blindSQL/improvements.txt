@@ -1,0 +1,17 @@
+
+Before blind letters&digits attack, discover the length of the passwrod (with binary search)
+
+Request as an argument a pattern to differ successfull and error responses
+
+Improving arguments parsing - look how linux binares parse the arguments
+
+Get from arguments the payload, the headers or field to attack (example: what cookie)
+
+maybe take a look to request timeout
+
+request a guess for password length(maybe the passwords from a site could have 
+restrictions such as minimum and maximum length) -min and max length arguments??
+
+Use req.session.get() to save the cookie in future cases
+
+add more groups of ascii chars to test??

